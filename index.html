@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>CYBER.DEFENSE | 次世代資安防禦中心</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* 配色系統 */
+            --bg-deep: #020617;
+            --neon-cyan: #06b6d4;     
+            --neon-purple: #8b5cf6;   
+            --alert-red: #ef4444;     
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --header-height: 80px;
+        }
+
+        /* --- 全局設定 --- */
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: calc(var(--header-height) + 20px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* =========================================
+           背景特效核心 (解決空洞感)
+           ========================================= */
+        
+        /* 1. 全域掃描線紋理 (CRT Effect) */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        /* 2. 背景容器 */
+        .cyber-bg-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #020617 80%);
+            overflow: hidden;
+        }
+
+        /* 3. 3D 透視網格 (The Grid) */
+        .perspective-grid {
+            position: absolute;
+            bottom: -30%;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 60%); /* 讓遠處淡出 */
+            opacity: 0.4;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(60px); }
+        }
+
+        /* 4. 漂浮粒子 (Particles) */
+        .particles span {
+            position: absolute;
+            bottom: -100px;
+            width: 3px; height: 3px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            animation: floatUp linear infinite;
+        }
+        .particles span:nth-child(1) { left: 10%; animation-duration: 8s; opacity: 0.5; }
+        .particles span:nth-child(2) { left: 30%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 2s; background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+        .particles span:nth-child(3) { left: 70%; animation-duration: 15s; animation-delay: 1s; opacity: 0.3; }
+        .particles span:nth-child(4) { left: 90%; width: 4px; height: 4px; animation-duration: 10s; background: var(--neon-purple); box-shadow: 0 0 10px var(--neon-purple); }
+        .particles span:nth-child(5) { left: 50%; animation-duration: 18s; animation-delay: 5s; opacity: 0.6; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        /* --- 字體與排版 --- */
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .text-cyan { color: var(--neon-cyan); }
+        .text-purple { color: var(--neon-purple); }
+        .text-red { color: var(--alert-red); }
+
+        /* --- Header --- */
+        header {
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: var(--header-height);
+            position: sticky; top: 0; z-index: 1000;
+            display: flex; align-items: center;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; width: 100%; }
+        .nav-wrapper { display: flex; justify-content: space-between; align-items: center; }
+
+        .brand {
+            font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 12px;
+            color: white; text-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a {
+            color: var(--text-muted); text-decoration: none; font-size: 0.95rem; font-weight: 500;
+            transition: 0.3s; position: relative;
+        }
+        .nav-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+        
+        .btn-tech {
+            background: rgba(6, 182, 212, 0.1); color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan); padding: 8px 24px; border-radius: 4px;
+            text-decoration: none; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+        .btn-tech:hover {
+            background: var(--neon-cyan); color: #000;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.6);
+        }
+
+        /* --- Hero --- */
+        .hero { padding: 8rem 0 6rem; text-align: center; position: relative; }
+        .hero h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 1.5rem; font-weight: 800; }
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem; }
+
+        /* 儀表板 (更強的玻璃感) */
+        .cyber-dashboard {
+            max-width: 900px; margin: 0 auto;
+            background: rgba(15, 23, 42, 0.5); /* 更透 */
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 16px; padding: 2.5rem;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(6, 182, 212, 0.05);
+            position: relative; overflow: hidden;
+        }
+        .stat-val { font-size: 2.5rem; font-weight: 700; display: block; text-shadow: 0 0 10px currentColor; }
+
+        /* --- Cards --- */
+        .section-title { text-align: center; margin-bottom: 4rem; position: relative; z-index: 2; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+
+        .tech-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem; border-radius: 12px;
+            transition: all 0.4s; position: relative; overflow: hidden;
+        }
+        .tech-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--neon-cyan);
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(6, 182, 212, 0.1);
+        }
+        .card-icon {
+            font-size: 2rem; margin-bottom: 1.5rem; color: var(--neon-cyan);
+            filter: drop-shadow(0 0 8px var(--neon-cyan));
+        }
+
+        /* --- Terminal / Email Sim --- */
+        .terminal-window {
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid #333; border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            max-width: 800px; margin: 0 auto;
+            position: relative; z-index: 2;
+        }
+        .email-content { background: #e2e8f0; color: #1e293b; padding: 2rem; }
+        
+        .danger-zone {
+            border: 2px dashed var(--alert-red);
+            background: rgba(239, 68, 68, 0.1);
+            position: relative; cursor: pointer;
+        }
+        .danger-zone:hover::after {
+            content: attr(data-warning);
+            position: absolute; bottom: 100%; left: 0;
+            background: var(--alert-red); color: white;
+            padding: 5px 10px; font-size: 0.8rem; border-radius: 4px;
+            white-space: nowrap; margin-bottom: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* --- Footer --- */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(2, 6, 23, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 4rem 0; margin-top: 6rem; text-align: center;
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+
+        /* RWD */
+        @media (max-width: 900px) {
+            .cyber-dashboard { grid-template-columns: 1fr; gap: 1.5rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景特效層 (固定不隨滾動移動，但有內部動畫) -->
+    <div class="scanlines"></div>
+    <div class="cyber-bg-container">
+        <div class="perspective-grid"></div>
+        <div class="particles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <!-- 導覽列 -->
+    <header>
+        <div class="container nav-wrapper">
+            <div class="brand">
+                <i class="fas fa-shield-cat" style="color: var(--neon-cyan);"></i>
+                <span class="font-mono">CYBER.DEFENSE</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#hero">戰情中心</a>
+                <a href="#guide">防護指南</a>
+                <a href="#simulation">威脅模擬</a>
+                <a href="#tools">工具箱</a>
+            </nav>
+            <a href="#" class="btn-tech">
+                <i class="fas fa-satellite-dish"></i> 緊急通報
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div style="margin-bottom: 1rem; color: var(--neon-purple); font-weight: bold; font-family: 'JetBrains Mono'; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-purple);">
+                SYSTEM SECURE /// ACCESS GRANTED
+            </div>
+            <h1>建立您的 <span class="gradient-text">數位防禦工事</span></h1>
+            <p>在零信任的網路世界中，唯有保持警覺，才能確保資產安全。<br>我們將複雜的資安技術，轉化為您一看就懂的生存指南。</p>
+            
+            <div class="cyber-dashboard">
+                <div class="stat-item">
+                    <span class="stat-label font-mono">THREAT LEVEL</span>
+                    <span class="stat-val text-cyan">NORMAL</span>
+                    <div style="height: 4px; width: 100%; background: #334155; margin-top: 10px; border-radius: 2px;">
+                        <div style="height: 100%; width: 20%; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label font-mono">PHISHING ATTEMPTS</span>
+                    <span class="stat-val text-purple">1,024</span>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">本月攔截數</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label font-mono">SYSTEM UPTIME</span>
+                    <span class="stat-val text-main">99.9%</span>
+                    <div style="font-size: 0.8rem; color: var(--neon-cyan); margin-top: 5px;">運行正常</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 知識卡片 -->
+    <section class="container" id="guide" style="padding: 4rem 2rem;">
+        <div class="section-title">
+            <h2>個人防禦矩陣</h2>
+            <p>啟動這三項防護措施，即可抵擋絕大多數攻擊</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="tech-card">
+                <div class="card-icon"><i class="fas fa-user-lock"></i></div>
+                <h3>身份驗證 (Identity)</h3>
+                <p>密碼是您的第一道防線。請勿使用生日或電話作為密碼，並務必開啟「雙重驗證 (2FA)」。</p>
+                <a href="#" style="color: var(--neon-cyan); text-decoration: none; font-weight: bold;">設定教學 &rarr;</a>
+            </div>
+            <div class="tech-card">
+                <div class="card-icon"><i class="fas fa-eye"></i></div>
+                <h3>社交工程 (Social Eng)</h3>
+                <p>駭客善於製造恐慌。收到「帳號凍結」、「緊急匯款」等訊息時，請先冷靜查證，切勿直接點擊連結。</p>
+                <a href="#simulation" style="color: var(--neon-cyan); text-decoration: none; font-weight: bold;">查看範例 &rarr;</a>
+            </div>
+            <div class="tech-card">
+                <div class="card-icon"><i class="fas fa-wifi"></i></div>
+                <h3>網路衛生 (Hygiene)</h3>
+                <p>公共 Wi-Fi 是駭客的遊樂場。在外請使用 4G/5G 熱點，並確保您的電腦與瀏覽器隨時處於最新版本。</p>
+                <a href="#" style="color: var(--neon-cyan); text-decoration: none; font-weight: bold;">檢查更新 &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 威脅模擬 -->
+    <section id="simulation" style="padding: 6rem 0; position: relative;">
+        <!-- 裝飾背景光 -->
+        <div style="position: absolute; top: 20%; right: 0; width: 300px; height: 300px; background: var(--neon-purple); filter: blur(150px); opacity: 0.15; z-index: 1;"></div>
+        
+        <div class="container">
+            <div class="section-title">
+                <h2>威脅模擬實驗室</h2>
+                <p>這是一封無害化的詐騙郵件，請移動滑鼠找出紅框處的危險訊號</p>
+            </div>
+
+            <div class="terminal-window">
+                <div style="background: #2d2d2d; padding: 10px 15px; border-bottom: 1px solid #444; display: flex; gap: 8px;">
+                    <div style="width: 12px; height: 12px; background: #ff5f56; border-radius: 50%;"></div>
+                    <div style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%;"></div>
+                    <div style="width: 12px; height: 12px; background: #27c93f; border-radius: 50%;"></div>
+                    <span style="margin-left: auto; color: #888; font-size: 0.8rem; font-family: monospace;">Suspicious_Mail_Viewer.exe</span>
+                </div>
+                <div class="email-content">
+                    <p style="border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">
+                        <strong>寄件者:</strong> <span class="danger-zone" data-warning="網域拼寫錯誤 (gmaii.com)">IT Support &lt;admin@gmaii.com&gt;</span>
+                    </p>
+                    <p>親愛的用戶：</p>
+                    <p>您的帳號出現異常登入。為了安全起見，我們將在 <strong style="color: red;">24小時內刪除您的帳號</strong>。</p>
+                    <br>
+                    <div style="text-align: center;">
+                        <span class="danger-zone" data-warning="連結指向不明 IP 位址" style="background: #004aad; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                            立即驗證身分
+                        </span>
+                    </div>
+                    <br>
+                    <p style="font-size: 0.8rem; color: #666;">
+                        *此為系統自動發送。<br>
+                        <span class="danger-zone" data-warning="製造恐慌感是典型詐騙手法">若不立即處理，您將失去所有資料。</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工具箱 -->
+    <section class="container" id="tools" style="padding: 4rem 2rem;">
+        <div style="background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 16px; padding: 3rem; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+            
+            <h2 style="margin-bottom: 1rem;">需要協助？</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">若您懷疑帳號被盜，或電腦出現勒索訊息，請立即採取行動。</p>
+            
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="https://haveibeenpwned.com/" target="_blank" class="btn-tech">
+                    <i class="fas fa-search"></i> 檢查 Email 洩漏
+                </a>
+                <a href="https://www.virustotal.com/" target="_blank" class="btn-tech" style="border-color: var(--neon-purple); color: var(--neon-purple);">
+                    <i class="fas fa-virus"></i> 線上掃毒
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="brand" style="justify-content: center; margin-bottom: 20px; opacity: 0.7;">
+                <i class="fas fa-shield-cat"></i> CYBER.DEFENSE
+            </div>
+            <p>&copy; 2025 Cyber Defense Center. All Systems Operational.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
